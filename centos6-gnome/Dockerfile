@@ -14,12 +14,7 @@ RUN yum update -y && yum groupinstall -y \
         python-setuptools \
     && yum clean all && rm -rf /tmp/* \
     && echo "%wheel ALL=(ALL) ALL" > /etc/sudoers.d/wheel \
-    && chmod 0440 /etc/sudoers.d/wheel \
-    && { \
-        echo "LANGUAGE=en xdg-user-dirs-update --force"; \
-        #echo "LANG=C xdg-user-dirs-gtk-update"; \
-    } > /usr/local/bin/change_dirname.sh \
-    && chmod 755 /usr/local/bin/change_dirname.sh
+    && chmod 0440 /etc/sudoers.d/wheel
 
 # Supervisor
 RUN easy_install supervisor \
