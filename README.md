@@ -18,7 +18,7 @@ add ``-e JAPANESE_SUPPORT=yes`` to docker run command.
 docker run -p 5900:5900 -p 5901:5901 -e JAPANESE_SUPPORT=yes -itd nutsllc/vnc-centos-gnome
 ```
 
-## Connect to container via VNC
+## Connect to container with VNC
 
 You need to have the VNC client application to connect to the container with VNC such as the RealVNC if you are windows user.
 
