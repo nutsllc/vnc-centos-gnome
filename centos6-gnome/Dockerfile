@@ -1,68 +1,81 @@
 FROM centos:centos6
 MAINTAINER Nuts Project, LLC <dev@nutsproject.jp>
 
-# Install the appropriate software
-RUN yum update -y && yum groupinstall -y "Desktop" "X Window System" "Fonts" "Japanese Support"
-RUN yum install -y epel-release wget vim-enhanced gedit file-roller gnome-system-monitor nautilus-open-terminal \
-    samba-client samba-common unzip firefox evolution libreoffice libreoffice-langpack-ja totem gimp git nano htop python-setuptools \
-    && yum clean all && rm -rf /tmp/*
+ENV ROOT_PASSWD=centos \
+    USER_PASSWD=password
 
-# Variables
-ENV ROOT_PASSWD  centos
-ENV USER_PASSWD  password
-
-# VNC & XRDP Servers
-RUN yum update -y \
-	&& yum install -y tigervnc tigervnc-server tigervnc-server-module xrdp xinetd \
-	&& yum clean all && rm -rf /tmp/* \
-	&& chkconfig vncserver on 3456 \
-	&& echo -e  "\
-VNCSERVERS=\"0:root 1:user\"\n\
-VNCSERVERARGS[0]=\"-geometry 1280x960\"\n\
-VNCSERVERARGS[1]=\"-geometry 1280x960\""\
->> /etc/sysconfig/vncservers \
-	&& chkconfig xrdp on 3456 \
-	&& chmod -v +x /etc/init.d/xrdp \
-	&& chmod -v +x /etc/xrdp/startwm.sh \
-	&& echo "gnome-session --session=gnome" > ~/.xsession
-
-# Create User and change passwords
-RUN su root sh -c "yes $ROOT_PASSWD | vncpasswd" && echo "root:$ROOT_PASSWD" | chpasswd \
-	&& useradd user \
-	&& su user sh -c "yes $USER_PASSWD | vncpasswd" && echo "user:$USER_PASSWD" | chpasswd
+# Install base( except "X Window System" "fonts" )
+RUN yum update -y && yum groupinstall -y \
+        "Desktop" \
+        "Japanese Support" \
+    && yum install -y \
+        epel-release \
+        sudo \
+        python-setuptools \
+    && yum clean all && rm -rf /tmp/* \
+    && echo "%wheel ALL=(ALL) ALL" > /etc/sudoers.d/wheel \
+    && chmod 0440 /etc/sudoers.d/wheel \
+    && { \
+        echo "LANGUAGE=en xdg-user-dirs-update --force"; \
+        #echo "LANG=C xdg-user-dirs-gtk-update"; \
+    } > /usr/local/bin/change_dirname.sh \
+    && chmod 755 /usr/local/bin/change_dirname.sh
 
 # Supervisor
 RUN easy_install supervisor \
 	&& mkdir -p /var/log/supervisor \
 	&& mkdir -p /etc/supervisord.d \
-	&& echo -e "\
-[supervisord]\n\
-nodaemon=true\n\
-logfile=/var/log/supervisor/supervisord.log\n\
-logfile_maxbytes=1MB\n\
-logfile_backups=1\n\
-loglevel=warn\n\
-pidfile=/var/run/supervisord.pid\n\
-[include]\n\
-files = /etc/supervisord.d/*.conf"\
-> /etc/supervisord.conf
+    && { \
+        echo '[supervisord]'; \
+        echo 'nodaemon=true'; \
+        echo 'logfile=/var/log/supervisor/supervisord.log'; \
+        echo 'logfile_maxbytes=1MB'; \
+        echo 'logfile_backups=1'; \
+        echo 'loglevel=warn'; \
+        echo 'pidfile=/var/run/supervisord.pid'; \
+        echo '[include]'; \
+        echo 'files = /etc/supervisord.d/*.conf'; \
+    } > /etc/supervisord.conf
 
-# Autostart services
-RUN echo -e  "\
-[program:xrdp]\n\
-command=/etc/init.d/xrdp restart\n\
-stderr_logfile=/var/log/supervisor/xrdp-error.log\n\
-stdout_logfile=/var/log/supervisor/xrdp.log"\
-> /etc/supervisord.d/xrdp.conf \
-	&& echo -e  "\
-[program:vncserver]\n\
-command=/etc/init.d/vncserver restart\n\
-stderr_logfile=/var/log/supervisor/vncserver-error.log\n\
-stdout_logfile=/var/log/supervisor/vncserver.log"\
-> /etc/supervisord.d/vnc.conf
+# VNC & XRDP Servers & Autostart services
+# tigervnc, tigervnc-server, tigervnc-server-module, xrdp, xinitd
+RUN yum update -y \
+	&& yum install -y \
+        tigervnc-server \
+        xrdp \
+        xinetd \
+	&& yum clean all && rm -rf /tmp/* \
+	&& chkconfig vncserver on 3456 \
+    && { \
+        echo 'VNCSERVERS="0:root 1:toybox"'; \
+        echo 'VNCSERVERARGS[0]="-geometry 1280x960"'; \
+        echo 'VNCSERVERARGS[1]="-geometry 1280x960"'; \
+    } >> /etc/sysconfig/vncservers \
+	&& chkconfig xrdp on 3456 \
+	&& chmod -v +x /etc/init.d/xrdp \
+	&& chmod -v +x /etc/xrdp/startwm.sh \
+	&& echo "gnome-session --session=gnome" > ~/.xsession \
+    && { \
+        echo '[program:xrdp]'; \
+        echo 'command=/etc/init.d/xrdp restart'; \
+        echo 'stderr_logfile=/var/log/supervisor/xrdp-error.log'; \
+        echo 'stdout_logfile=/var/log/supervisor/xrdp.log'; \
+    } > /etc/supervisord.d/xrdp.conf \
+    && { \
+        echo '[program:vncserver]'; \
+        echo 'command=/etc/init.d/vncserver restart'; \
+        echo 'stderr_logfile=/var/log/supervisor/vncserver-error.log'; \
+        echo 'stdout_logfile=/var/log/supervisor/vncserver.log'; \
+    } > /etc/supervisord.d/vnc.conf
 
-# Applying GNOME Settings for all users
-# https://docs.oracle.com/cd/E19957-01/817-6000/6mldto81d/index.html
+# Create User
+RUN su root sh -c "yes $ROOT_PASSWD | vncpasswd" \
+    && echo "root:$ROOT_PASSWD" | chpasswd \
+	&& useradd -g wheel toybox \
+	&& su toybox sh -c "yes $USER_PASSWD | vncpasswd" \
+    && echo "toybox:$USER_PASSWD" | chpasswd
+
+# GNOME Settings for all users
 RUN gconftool-2 --direct --config-source xml:readwrite:/etc/gconf/gconf.xml.mandatory \
 	    --type bool  --set /apps/nautilus/preferences/always_use_browser true \
 	&& gconftool-2 --direct --config-source xml:readwrite:/etc/gconf/gconf.xml.mandatory \
@@ -88,32 +101,10 @@ RUN gconftool-2 --direct --config-source xml:readwrite:/etc/gconf/gconf.xml.mand
 	&& gconftool-2 --direct --config-source xml:readwrite:/etc/gconf/gconf.xml.mandatory \
 	    --type bool --set /desktop/gnome/remote_access/prompt_enabled false
 
-# enable DBUS for IME
-RUN dbus-uuidgen > /var/lib/dbus/machine-id
-
-# enable IME
-RUN ln -sf /etc/X11/xinit/xinput.d/ibus.conf /root/.xinputrc \
-    && ln -sf /etc/X11/xinit/xinput.d/ibus.conf /home/user/.xinputrc
-
-# ime settings
-RUN gconftool-2 --direct --config-source xml:readwrite:/etc/gconf/gconf.xml.mandatory \
-     	--type bool --set /desktop/gnome/interface/show_input_method_menu true \
-    && gconftool-2 --direct --config-source xml:readwrite:/etc/gconf/gconf.xml.mandatory \
-     	--type list --list-type string --set /desktop/ibus/general/preload_engines ["anthy"] \
-    && gconftool-2 --direct --config-source xml:readwrite:/etc/gconf/gconf.xml.mandatory \
-     	--type bool --set /desktop/ibus/general/use_global_engine true \
-    && gconftool-2 --direct --config-source xml:readwrite:/etc/gconf/gconf.xml.mandatory \
-     	--type bool --set /desktop/ibus/panel/show_im_name true \
-    && gconftool-2 --direct --config-source xml:readwrite:/etc/gconf/gconf.xml.mandatory \
-        --type bool --set /desktop/ibus/panel/use_custom_font true \
-    && gconftool-2 --direct --config-source xml:readwrite:/etc/gconf/gconf.xml.mandatory \
-    	    --type string --set /desktop/ibus/panel/custom_font "IPAPGothic 12"
-
-# Inform which port could be opened
 EXPOSE 5900 5901 3389
 
-# Exec configuration to container
 COPY docker-entrypoint.sh /entrypoint.sh
+COPY /installer/ /installer/
 
 ENTRYPOINT ["/entrypoint.sh"]
 
