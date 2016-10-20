@@ -99,7 +99,7 @@ RUN gconftool-2 --direct --config-source xml:readwrite:/etc/gconf/gconf.xml.mand
 EXPOSE 5900 5901 3389
 
 COPY docker-entrypoint.sh /entrypoint.sh
-COPY /installer/ /installer/
+#COPY /installer/ /installer/
 
 ENTRYPOINT ["/entrypoint.sh"]
 
