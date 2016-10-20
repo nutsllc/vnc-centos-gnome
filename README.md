@@ -59,7 +59,7 @@ There are some application installers in ``/installer`` directory. So you can ea
 
 ### How to use them
 
-For example, if you want to install the Firefox, run ``/installer/firefox.sh`` in the Terminal or double-click on the ``/installer/firefox.sh`` file on the desktop.
+For example, if you want to install the Firefox, run ``/installer/firefox.sh`` in the Terminal or double-click on the ``/installer/firefox.sh`` file on the desktop and click "Run in Terminal" button in the dialog box appeared.
 
 ## Contributing
 
