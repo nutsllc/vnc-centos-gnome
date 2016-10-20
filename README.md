@@ -34,6 +34,33 @@ Connection as a general user(username:toybox):
 
 ``vnc://<Hostname(IP Address)>:5901`` and password: ``password``
 
+## Application installers
+
+There are some application installers in ``/installer`` directory. So you can easy install typical applications in the list below.
+
+* LibreOffice
+* Dropbox
+* Evolution
+* Firefox
+* gedit
+* general_purpose_desktop
+* Gimp
+* gthumb
+* LibreOffice
+* nano
+* nautilus-open-terminal
+* Network_utilities
+* Samba_client
+* Sublime_text_3
+* System_utilities
+* totem
+* Utilities
+* vim
+
+### How to use them
+
+For example, if you want to install the Firefox, run ``/installer/firefox.sh`` in the Terminal or double-click on the ``/installer/firefox.sh`` file on the desktop.
+
 ## Contributing
 
 We'd love for you to contribute to this container. You can request new features by creating an [issue](https://github.com/nutsllc/vnc-centos-gnome/issues), or submit a [pull request](https://github.com/nutsllc/vnc-centos-gnome/pulls) with your contribution.
