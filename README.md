@@ -20,19 +20,30 @@ docker run -p 5900:5900 -p 5901:5901 -e JAPANESE_SUPPORT=yes -itd nutsllc/vnc-ce
 
 ## Connect to container with VNC
 
-You need to have the VNC client application to connect to the container with VNC such as the RealVNC if you are windows user.
+### from Windows
 
-On MacOS, you can be able to connect to it from Finder. You need no more additional VNC client application. 
+You need to have the VNC client application to connect to the container with VNC such as the RealVNC.
 
-Only you have to do is that it select "Go" > "Connect to Server..." from a menubar of Finder.
+#### Connection as the root user
 
-Connection as a root user:
+Address: ``vnc://<Hostname(IP Address)>:5900``  
+password: ``centos``
 
-``vnc://<Hostname(IP Address)>:5900`` and password: ``centos`` 
+#### connection as the general user
 
-Connection as a general user(username:toybox):
+Address: ``vnc://<Hostname(IP Address)>:5901``  
+password: ``password``
 
-``vnc://<Hostname(IP Address)>:5901`` and password: ``password``
+### from MacOSX
+
+On MacOS, you can be able to connect to it from the terminal command. You need no more additional VNC client application. 
+
+In the terminal: 
+
+Run ``open vnc://localhost:5900`` to connect as a root user  
+Run ``open vnc://localhost:5901`` to connect as a general user.
+
+Each passwords are the same as a case of Windows.
 
 ## Application installers
 
@@ -40,6 +51,7 @@ There are some application installers in ``/installer`` directory. So you can ea
 
 * LibreOffice
 * Dropbox
+* Eclipse
 * Evolution
 * Firefox
 * general_purpose_desktop

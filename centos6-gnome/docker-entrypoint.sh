@@ -52,6 +52,7 @@ mkdir -p /installer
 apps=(
     LibreOffice
     dropbox
+    eclipse
     evolution
     firefox
     general_purpose_desktop
@@ -85,8 +86,32 @@ for app in ${apps[@]}; do
             func="${func} libreoffice-langpack-ja"
         }
 
+    elif [ "${app}" = "eclipse" ]; then
+    func=$(cat << 'EOF'
+    tools=(wget unzip)
+    for tool in ${tools[@]}; do
+        if ! which ${tool}; then
+            yum update -y && yum install -y ${tool}
+        fi
+    done
+    
+    yum install -y eclipse && yum clean all && rm -rf /tmp/*
+    
+    [ ${LANG} = "ja_JP.UTF-8" ] && {
+        libdir=/usr/lib64/eclipse
+        name=pleiades
+        mkdir -p /tmp/${name}
+        wget https://ja.osdn.net/projects/mergedoc/downloads/66003/pleiades_1.7.0.zip/ -O /tmp/${name}/${name}.zip
+        unzip /tmp/${name}/${name}.zip -d /tmp/${name}
+        cp -r /tmp/${name}/features/jp.sourceforge.mergedoc.pleiades ${libdir}/features
+        cp -r /tmp/${name}/plugins/jp.sourceforge.mergedoc.pleiades ${libdir}/plugins
+        rm -rf /tmp${name}
+        echo "-javaagent:${libdir}/plugins/jp.sourceforge.mergedoc.pleiades/${name}.jar" >> /etc/eclipse.ini
+    }
+EOF
+)
     elif [ "${app}" = "dropbox" ]; then
-        func=$(cat << EOF
+        func=$(cat << 'EOF'
 if ! which wget; then
         yum update -y && yum install -y wget && yum clean all && rm -rf /tmp/*
     fi
@@ -135,7 +160,7 @@ EOF
         func="${yum} samba-client samba-common && ${yum_clean}"
 
     elif [ "${app}" = "sublime_text_3" ]; then
-        func=$(cat << EOF
+        func=$(cat << 'EOF'
 if ! which wget; then
         yum update -y && yum install -y wget && yum clean all && rm -rf /tmp/*
     fi
