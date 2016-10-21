@@ -11,6 +11,7 @@ RUN yum update -y && yum groupinstall -y \
     && yum install -y \
         epel-release \
         sudo \
+        gedit \
         python-setuptools \
     && yum clean all && rm -rf /tmp/* \
     && echo "%wheel ALL=(ALL) ALL" > /etc/sudoers.d/wheel \
