@@ -54,14 +54,15 @@ apps=(
     dropbox
     evolution
     firefox
-    gedit
     general_purpose_desktop
     gimp
+    git
     gthumb
-    LibreOffice
     nano
     nautilus-open-terminal
+    netbeans-ide-8.2
     network_utilities
+    rhythmbox
     samba_client
     sublime_text_3
     system_utilities
@@ -75,6 +76,7 @@ for app in ${apps[@]}; do
 
     yum="yum update -y && yum install -y"
     yum_group="yum update -y && yum groupinstall -y"
+    yum_clean="yum clean all && rm -rf /tmp/*"
     func=""
 
     if [ "${app}" = "LibreOffice" ]; then
@@ -86,7 +88,7 @@ for app in ${apps[@]}; do
     elif [ "${app}" = "dropbox" ]; then
         func=$(cat << EOF
 if ! which wget; then
-        yum update -y && yum install -y wget
+        yum update -y && yum install -y wget && yum clean all && rm -rf /tmp/*
     fi
     cd ${HOME}
     wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
@@ -97,18 +99,45 @@ if ! which wget; then
 EOF
 )
     elif [ "${app}" = "general_purpose_desktop" ]; then
-        func="${yum_group} 'General Purpose Desktop'"
+        func="${yum_group} 'General Purpose Desktop' && ${yum_clean}"
 
+    elif [ "${app}" = "netbeans-ide-8.2" ]; then
+        func=$(cat << EOF
+# Java SE Development Kit 8u111
+    echo "You must accept the Oracle Binary Code License Agreement for Java SE to download this software."
+    echo "(http://www.oracle.com/technetwork/java/javase/terms/license/index.html)"
+
+    while true; do
+      read -p "Do you agree with the licences? (Y/N): " yn
+      case \$yn in
+        [Yy]* ) 
+            if ! which wget; then
+                yum update -y && yum install -y wget && yum clean all && rm -rf /tmp/*
+            fi
+            wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u111-b14/jdk-8u111-linux-x64.rpm -O /tmp/jdk.rpm
+            rpm -ivh /tmp/jdk.rpm
+            wget http://download.netbeans.org/netbeans/8.2/final/bundles/netbeans-8.2-linux.sh -O ${HOME}/netbeans-ide-8.2_installer.sh
+            chmod 755 ${HOME}/netbeans-ide-8.2_installer.sh
+            sh ${HOME}/netbeans-ide-8.2_installer.sh
+            break
+            ;;
+
+        [Nn]* ) break;;
+        * ) echo "Please answer yes or no."; exit 1;;
+      esac
+    done
+EOF
+)
     elif [ "${app}" = "network_utilities" ]; then
-        func="${yum} curl wget"
+        func="${yum} curl wget && ${yum_clean}"
 
     elif [ "${app}" = "samba_client" ]; then
-        func="${yum} samba-client samba-common"
+        func="${yum} samba-client samba-common && ${yum_clean}"
 
     elif [ "${app}" = "sublime_text_3" ]; then
         func=$(cat << EOF
 if ! which wget; then
-        yum update -y && yum install -y wget
+        yum update -y && yum install -y wget && yum clean all && rm -rf /tmp/*
     fi
     wget https://download.sublimetext.com/sublime_text_3_build_3126_x64.tar.bz2 -O ~/Downloads/sublime.tar.bz2
     tar jxvf ~/Downloads/sublime.tar.bz2 -C /opt
@@ -121,13 +150,13 @@ if ! which wget; then
 EOF
 )
     elif [ "${app}" = "system_utilities" ]; then
-        func="${yum} htop dstat gnome-utils gnome-system-monitor system-config-language gconf-editor"
+        func="${yum} htop dstat gnome-utils gnome-system-monitor system-config-language gconf-editor && ${yum_clean}"
 
     elif [ "${app}" = "utilities" ]; then
-        func="${yum} file-roller unzip"
+        func="${yum} file-roller unzip && ${yum_clean}"
 
     else
-        func="${yum} ${app}"
+        func="${yum} ${app} && ${yum_clean}"
     fi
     cat << EOF > /installer/${app}.sh
 #!/bin/bash

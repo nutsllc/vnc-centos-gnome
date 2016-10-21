@@ -42,14 +42,15 @@ There are some application installers in ``/installer`` directory. So you can ea
 * Dropbox
 * Evolution
 * Firefox
-* gedit
 * general_purpose_desktop
 * Gimp
+* Git
 * gthumb
-* LibreOffice
 * nano
 * nautilus-open-terminal
+* Netbeans-IDE-8.2
 * Network_utilities
+* Rhythmbox
 * Samba_client
 * Sublime_text_3
 * System_utilities
