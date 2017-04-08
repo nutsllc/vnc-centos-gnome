@@ -2,7 +2,7 @@
 
 A Dockerfile for deploying the VNC server using Docker container.
 
-This image is registered to the [Docker Hub](https://hub.docker.com/r/nutsllc/toybox-gitbucket/) which is the official docker image registory.
+This image is registered to the [Docker Hub](https://hub.docker.com/r/nutsllc/vnc-centos-gnome/) which is the official docker image registory.
 
 ## Run container
 
@@ -58,6 +58,7 @@ There are some application installers in ``/installer`` directory. So you can ea
 * Gimp
 * Git
 * gthumb
+* inkscape
 * nano
 * nautilus-open-terminal
 * Netbeans-IDE-8.2
