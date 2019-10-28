@@ -4,6 +4,10 @@ A Dockerfile for deploying the VNC server using Docker container.
 
 This image is registered to the [Docker Hub](https://hub.docker.com/r/nutsllc/vnc-centos-gnome/) which is the official docker image registory.
 
+## Screenshots
+
+![top-page](https://raw.githubusercontent.com/nutsllc/vnc-centos-gnome/images/screenshot-01.png)
+
 ## Run container
 
 ```bash
