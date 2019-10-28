@@ -1,4 +1,5 @@
-FROM centos:centos6
+#FROM centos:centos6
+FROM centos:6.10
 MAINTAINER Nuts Project, LLC <dev@nutsproject.jp>
 
 ENV ROOT_PASSWD=centos \
@@ -12,13 +13,19 @@ RUN yum update -y && yum groupinstall -y \
         epel-release \
         sudo \
         gedit \
-        python-setuptools \
     && yum clean all && rm -rf /tmp/* \
     && echo "%wheel ALL=(ALL) ALL" > /etc/sudoers.d/wheel \
     && chmod 0440 /etc/sudoers.d/wheel
 
-# Supervisor
-RUN easy_install supervisor \
+# Install python2.7 and supervisor
+RUN yum install -y centos-release-scl \
+    && yum install -y \
+        python27 \
+        python27-python-setuptools \
+    && yum clean all && rm -rf /tmp/* \
+    && . /opt/rh/python27/enable \
+    && echo $(python --version) \
+    && easy_install supervisor \
 	&& mkdir -p /var/log/supervisor \
 	&& mkdir -p /etc/supervisord.d \
     && { \
@@ -104,4 +111,4 @@ COPY docker-entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-CMD ["supervisord"]
+CMD ["/opt/rh/python27/root/usr/bin/supervisord"]

@@ -94,9 +94,9 @@ for app in ${apps[@]}; do
             yum update -y && yum install -y ${tool}
         fi
     done
-    
+
     yum install -y eclipse && yum clean all && rm -rf /tmp/*
-    
+
     [ ${LANG} = "ja_JP.UTF-8" ] && {
         libdir=/usr/lib64/eclipse
         name=pleiades
@@ -135,7 +135,7 @@ EOF
     while true; do
       read -p "Do you agree with the licences? (Y/N): " yn
       case \$yn in
-        [Yy]* ) 
+        [Yy]* )
             if ! which wget; then
                 yum update -y && yum install -y wget && yum clean all && rm -rf /tmp/*
             fi
@@ -203,5 +203,11 @@ done
 # temp
 echo "alias la='ls -la'" >> /root/.bashrc
 echo "alias la='ls -la'" >> /home/toybox/.bashrc
+
+# for python2.7
+rm -f /usr/bin/python
+ln -s /opt/rh/python27/root/usr/bin/python /usr/bin/python
+ln -s /opt/rh/python27/root/usr/lib64/libpython2.7.so.1.0 /lib64/libpython2.7.so.1.0
+sed -i -e 's/python/python2.6/' /usr/bin/yum
 
 exec $@
