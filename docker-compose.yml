@@ -1,9 +1,0 @@
-vnc:
-    image: nutsllc/vnc-centos-gnome
-    environment:
-        - TOYBOX_UID=1000
-        - TOYBOX_GID=1000
-        - JAPANESE_SUPPORT=yes
-    ports:
-        - "5900:5900"
-        - "5901:5901"
